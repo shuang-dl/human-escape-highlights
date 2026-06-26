@@ -6,8 +6,11 @@
 // every conversation for the week — that can be huge and time out behind a gateway.
 
 const DEFAULT_BASE = "https://api.intercom.io";
-const PAGE_TIMEOUT_MS = 20000;       // per-request safety timeout
+const PAGE_TIMEOUT_MS = 45000;       // per-request safety timeout (generous; the job runs in the background)
+const PAGE_RETRIES = 2;              // retry a slow/failed page a couple times
 const ESCALATED_VALUES = ["escalated", "routed_to_team"];
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function authHeaders(token, version) {
   return {
@@ -18,7 +21,7 @@ function authHeaders(token, version) {
   };
 }
 
-async function postJson(url, body, { token, version }) {
+async function postJsonOnce(url, body, { token, version }) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), PAGE_TIMEOUT_MS);
   let res;
@@ -31,9 +34,13 @@ async function postJson(url, body, { token, version }) {
     });
   } catch (netErr) {
     if (netErr.name === "AbortError") {
-      throw new Error(`Intercom request timed out after ${PAGE_TIMEOUT_MS / 1000}s.`);
+      const e = new Error(`Intercom request timed out after ${PAGE_TIMEOUT_MS / 1000}s.`);
+      e.retryable = true;
+      throw e;
     }
-    throw new Error(`Could not reach the Intercom API at ${url} (network error: ${netErr.message}).`);
+    const e = new Error(`Could not reach the Intercom API at ${url} (network error: ${netErr.message}).`);
+    e.retryable = true;
+    throw e;
   } finally {
     clearTimeout(timer);
   }
@@ -41,12 +48,27 @@ async function postJson(url, body, { token, version }) {
     const text = await res.text().catch(() => "");
     const err = new Error(`Intercom API returned HTTP ${res.status}: ${text.slice(0, 300)}`);
     err.status = res.status;
+    err.retryable = res.status === 429 || res.status >= 500;   // rate-limit / server errors
     throw err;
   }
   return res.json();
 }
 
-async function searchAllPages(query, { token, version, maxPages, base }) {
+async function postJson(url, body, opts) {
+  let lastErr;
+  for (let attempt = 0; attempt <= PAGE_RETRIES; attempt++) {
+    try {
+      return await postJsonOnce(url, body, opts);
+    } catch (e) {
+      lastErr = e;
+      if (!e.retryable || attempt === PAGE_RETRIES) throw e;
+      await sleep(1000 * (attempt + 1));   // simple backoff: 1s, 2s
+    }
+  }
+  throw lastErr;
+}
+
+async function searchAllPages(query, { token, version, maxPages, base, onProgress }) {
   const url = `${base}/conversations/search`;
   const all = [];
   let startingAfter = null;
@@ -57,6 +79,7 @@ async function searchAllPages(query, { token, version, maxPages, base }) {
     };
     const data = await postJson(url, body, { token, version });
     for (const c of (data.conversations || [])) all.push(c);
+    if (typeof onProgress === "function") onProgress(all.length);
     startingAfter = data?.pages?.next?.starting_after || null;
     if (!startingAfter) break;
   }
@@ -80,7 +103,8 @@ export async function fetchEscalatedConversations(range, {
   token,
   version = "2.11",
   maxPages = 40,
-  base = DEFAULT_BASE
+  base = DEFAULT_BASE,
+  onProgress = null
 } = {}) {
   if (!token) throw new Error("Intercom token is not set.");
 
@@ -98,7 +122,7 @@ export async function fetchEscalatedConversations(range, {
       value: [...dateClauses, { field: "ai_agent.resolution_state", operator: "=", value }]
     };
     try {
-      const result = await searchAllPages(query, { token, version, maxPages, base });
+      const result = await searchAllPages(query, { token, version, maxPages, base, onProgress });
       if (result.length) { conversations = result; break; }
       if (conversations === null) conversations = result;   // remember a valid empty result
     } catch (e) {

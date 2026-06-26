@@ -159,38 +159,54 @@
     a.href=url; a.download=name; document.body.appendChild(a); a.click();
     setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
   }
+  async function readJson(res){
+    const ct = res.headers.get('content-type') || '';
+    if(!ct.includes('application/json')){
+      const text = await res.text();
+      throw new Error('Server sent a non-data response (HTTP ' + res.status + '). First bit: '
+        + text.replace(/\s+/g,' ').slice(0,120));
+    }
+    return res.json();
+  }
+  const wait = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+  function onJobDone(result){
+    openHtml(result.reportHtml, (result.range && result.range.label) ? result.range.label+' (new)' : 'New report');
+    downloadFile(result.fileName, result.reportHtml, 'text/html');
+    downloadFile('index.json', JSON.stringify(result.indexJson, null, 2), 'application/json');
+    setStatus('Generated for ' + (result.range?result.range.label:'last week') + '.', 'ok');
+    const note = document.getElementById('note');
+    note.innerHTML = '<b>Two files were downloaded.</b> To make this week permanent in the hub: '
+      + 'move <code>' + escapeHtml(result.fileName) + '</code> into the <code>reports/</code> folder, replace '
+      + '<code>reports/index.json</code> with the downloaded <code>index.json</code>, then commit &amp; push to GitHub. '
+      + 'DeployBay will redeploy and the new week will appear here.';
+    note.classList.add('show');
+  }
+
   async function generate(){
     const btn = document.getElementById('gen-btn');
-    const note = document.getElementById('note');
-    note.classList.remove('show');
+    document.getElementById('note').classList.remove('show');
     btn.disabled = true;
-    setStatus('Working… pulling last week\'s escalations from Intercom (this can take up to a minute).');
+    setStatus('Starting…');
     try{
-      const res = await fetch('/api/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
-      const ct = res.headers.get('content-type') || '';
-      if(!ct.includes('application/json')){
-        const text = await res.text();
-        throw new Error('Server sent a non-data response (HTTP ' + res.status + '). '
-          + (res.status===504 || res.status===502 ? 'Looks like the request timed out — the Intercom pull took too long. '
-             : '')
-          + 'First bit: ' + text.replace(/\s+/g,' ').slice(0,120));
+      // 1) Kick off the background job.
+      const startRes = await fetch('/api/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+      const start = await readJson(startRes);
+      if(!startRes.ok || !start.ok || !start.jobId){ throw new Error(start.error || ('HTTP '+startRes.status)); }
+
+      // 2) Poll for progress until done or error (up to ~8 minutes).
+      const jobId = start.jobId;
+      const deadline = Date.now() + 8*60*1000;
+      while(Date.now() < deadline){
+        await wait(2000);
+        const sRes = await fetch('/api/generate/status/' + encodeURIComponent(jobId), {cache:'no-store'});
+        const s = await readJson(sRes);
+        if(!sRes.ok || !s.ok){ throw new Error(s.error || ('HTTP '+sRes.status)); }
+        if(s.message) setStatus(s.message);
+        if(s.status === 'done'){ onJobDone(s.result); return; }
+        if(s.status === 'error'){ throw new Error(s.error || 'Generation failed.'); }
       }
-      const data = await res.json();
-      if(!res.ok || !data.ok){ throw new Error(data.error || ('HTTP '+res.status)); }
-
-      // Show it immediately…
-      openHtml(data.reportHtml, (data.range && data.range.label) ? data.range.label+' (new)' : 'New report');
-
-      // …and hand over the two files to commit to GitHub.
-      downloadFile(data.fileName, data.reportHtml, 'text/html');
-      downloadFile('index.json', JSON.stringify(data.indexJson, null, 2), 'application/json');
-
-      setStatus('Generated for ' + (data.range?data.range.label:'last week') + '.', 'ok');
-      note.innerHTML = '<b>Two files were downloaded.</b> To make this week permanent in the hub: '
-        + 'move <code>' + escapeHtml(data.fileName) + '</code> into the <code>reports/</code> folder, replace '
-        + '<code>reports/index.json</code> with the downloaded <code>index.json</code>, then commit &amp; push to GitHub. '
-        + 'DeployBay will redeploy and the new week will appear here.';
-      note.classList.add('show');
+      throw new Error('Timed out waiting for the report (still running after 8 minutes).');
     }catch(e){
       setStatus('Could not generate: ' + e.message, 'err');
     }finally{

@@ -1,0 +1,33 @@
+# nginx site config. ${PORT} is filled in from the environment at container start
+# (defaults to 80 — see the Dockerfile). nginx's own variables like $uri are left
+# untouched because only environment variables are substituted.
+
+server {
+    listen       ${PORT};
+    listen       [::]:${PORT};
+    server_name  _;
+
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # Serve files directly; fall back to the hub for any unknown path.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # HTML should always reflect the latest weekly run, so don't cache it.
+    location ~* \.html$ {
+        add_header Cache-Control "no-cache";
+    }
+
+    # A simple health endpoint some platforms check.
+    location = /healthz {
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 "ok\n";
+    }
+
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+}

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Support AI Insights — Hub</title>
+<style>
+  :root{
+    --navy:#0b1f3a; --blue:#1f6feb; --blue-soft:#eaf1fe;
+    --ink:#1a2230; --muted:#5b6675; --line:#e3e8ef; --bg:#f6f8fb;
+    --green:#1f9d6b; --amber:#c98a00; --red:#d64545; --card:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45;font-size:14px;}
+  .wrap{max-width:920px;margin:0 auto;padding:30px 28px 60px;}
+
+  header.hub-head{border-left:6px solid var(--blue);padding:4px 0 4px 16px;margin-bottom:6px;}
+  header.hub-head .eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:700;color:var(--blue);margin:0 0 4px;}
+  header.hub-head h1{font-size:24px;margin:0 0 6px;color:var(--navy);}
+  header.hub-head p{margin:0;font-size:13px;color:var(--muted);max-width:680px;}
+
+  .toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:18px 0 4px;padding-left:16px;}
+  .btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s,opacity .15s;}
+  .btn:hover{background:#1559c0;}
+  .btn:disabled{opacity:.6;cursor:default;}
+  .status{font-size:12.5px;color:var(--muted);}
+  .status.err{color:var(--red);} .status.ok{color:var(--green);}
+
+  .note{margin:10px 0 0 16px;font-size:12px;color:var(--muted);background:var(--blue-soft);border:1px solid #d4e2fd;border-radius:9px;padding:10px 12px;max-width:680px;display:none;}
+  .note.show{display:block;} .note b{color:var(--navy);}
+
+  h2.list-title{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:7px;margin:24px 0 14px;}
+
+  .entry{display:block;width:100%;text-align:left;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:11px;font:inherit;color:inherit;transition:border-color .15s,box-shadow .15s,transform .05s;}
+  .entry:hover{border-color:var(--blue);box-shadow:0 3px 14px rgba(31,111,235,.10);}
+  .entry:active{transform:translateY(1px);}
+  .entry-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+  .entry-week{font-size:16px;font-weight:700;color:var(--navy);}
+  .entry-gen{font-size:11px;color:var(--muted);white-space:nowrap;}
+  .entry-headline{font-size:13px;color:var(--ink);margin:6px 0 9px;}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+  .chip{font-size:11px;background:var(--blue-soft);color:#1455c4;border:1px solid #d4e2fd;border-radius:999px;padding:2px 9px;font-weight:600;}
+  .entry-cue{font-size:11px;color:var(--blue);font-weight:600;margin-left:auto;}
+
+  .empty{color:var(--muted);font-size:13px;padding:18px;border:1px dashed var(--line);border-radius:10px;}
+
+  footer.hub-foot{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;font-size:11px;color:var(--muted);}
+
+  .backdrop{position:fixed;inset:0;background:rgba(11,31,58,.38);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;z-index:40;}
+  .backdrop.open{opacity:1;visibility:visible;}
+  .panel{position:fixed;top:0;right:0;height:100%;width:min(880px,96vw);background:var(--bg);box-shadow:-10px 0 40px rgba(11,31,58,.22);transform:translateX(100%);transition:transform .28s ease;z-index:50;display:flex;flex-direction:column;}
+  .panel.open{transform:translateX(0);}
+  .panel-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;background:var(--navy);color:#fff;}
+  .panel-bar .ttl{font-size:14px;font-weight:600;}
+  .panel-actions{display:flex;align-items:center;gap:6px;}
+  .panel-actions a,.panel-actions button{color:#fff;background:rgba(255,255,255,.14);border:none;border-radius:7px;padding:7px 11px;font-size:12px;cursor:pointer;text-decoration:none;font:inherit;}
+  .panel-actions a:hover,.panel-actions button:hover{background:rgba(255,255,255,.26);}
+  .panel-frame{flex:1 1 auto;width:100%;border:none;background:#fff;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hub-head">
+    <p class="eyebrow">DoorLoop CX · Human-Escape Loop</p>
+    <h1>Weekly Support AI Insights — Hub</h1>
+    <p>A running log of weekly reports on the top UI/product issues causing Fin to escalate to a human.
+       Click any week to read its report. Generate a new week with the button below.</p>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn" id="gen-btn" onclick="generate()">Generate last week's report</button>
+    <span class="status" id="status"></span>
+  </div>
+  <div class="note" id="note"></div>
+
+  <h2 class="list-title">Weekly reports — newest first</h2>
+  <div id="list"><div class="empty">Loading…</div></div>
+
+  <footer class="hub-foot">
+    Source: Intercom API (Search Conversations; Fin resolution state = Escalated). Topics are grouped from
+    Intercom's AI category fields and are directional. New reports are generated on demand and committed to GitHub.
+  </footer>
+</div>
+
+<div class="backdrop" id="backdrop" onclick="closePanel()"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Weekly report">
+  <div class="panel-bar">
+    <div class="ttl" id="panel-title">Weekly report</div>
+    <div class="panel-actions">
+      <a id="panel-open-file" href="#" target="_blank" rel="noopener" title="Open in a new tab">Open in new tab ↗</a>
+      <button onclick="closePanel()" aria-label="Close">Close ✕</button>
+    </div>
+  </div>
+  <iframe class="panel-frame" id="panel-frame" title="Weekly report"></iframe>
+</aside>
+
+<script>
+  // ---------- Hub list ----------
+  async function loadIndex(){
+    const list = document.getElementById('list');
+    try{
+      const res = await fetch('reports/index.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('no index');
+      const data = await res.json();
+      const reports = (data.reports||[]).slice().sort((a,b)=>
+        (b?.dateRange?.start||'').localeCompare(a?.dateRange?.start||''));
+      if(!reports.length){ list.innerHTML = '<div class="empty">No reports yet. Click “Generate last week\'s report”.</div>'; return; }
+      list.innerHTML = reports.map(cardHtml).join('');
+    }catch(e){
+      list.innerHTML = '<div class="empty">No reports logged yet (couldn\'t read reports/index.json). Generate one to get started.</div>';
+    }
+  }
+  function cardHtml(r){
+    const chips = (r.chips||[]).map(c=>`<span class="chip">${escapeHtml(c)}</span>`).join('');
+    return `<button class="entry" onclick='openFile(${JSON.stringify(r.file)}, ${JSON.stringify(r.weekLabel||"")})'>
+      <div class="entry-top">
+        <span class="entry-week">${escapeHtml(r.weekLabel||r.id||'Report')}</span>
+        <span class="entry-gen">${r.generatedOn?('Generated '+escapeHtml(r.generatedOn)):''}</span>
+      </div>
+      <div class="entry-headline">${escapeHtml(r.headline||'')}</div>
+      <div class="chips">${chips}<span class="entry-cue">Open report →</span></div>
+    </button>`;
+  }
+  function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  // ---------- Panel ----------
+  function openPanel(title, fileHrefOrNull){
+    document.getElementById('panel-title').textContent = title || 'Weekly report';
+    const link = document.getElementById('panel-open-file');
+    if(fileHrefOrNull){ link.href = fileHrefOrNull; link.style.display=''; } else { link.style.display='none'; }
+    document.getElementById('panel').classList.add('open');
+    document.getElementById('backdrop').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function openFile(file, label){
+    document.getElementById('panel-frame').src = file;
+    openPanel(label||'Weekly report', file);
+  }
+  function openHtml(html, label){
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    document.getElementById('panel-frame').src = url;
+    openPanel(label||'New report (not yet saved)', null);
+  }
+  function closePanel(){
+    document.getElementById('panel').classList.remove('open');
+    document.getElementById('backdrop').classList.remove('open');
+    document.body.style.overflow='';
+  }
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePanel(); });
+
+  // ---------- Generate ----------
+  function setStatus(msg, cls){ const s=document.getElementById('status'); s.textContent=msg||''; s.className='status'+(cls?(' '+cls):''); }
+  function downloadFile(name, content, mime){
+    const blob = new Blob([content], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+  }
+  async function generate(){
+    const btn = document.getElementById('gen-btn');
+    const note = document.getElementById('note');
+    note.classList.remove('show');
+    btn.disabled = true;
+    setStatus('Working… pulling last week\'s escalations from Intercom (this can take up to a minute).');
+    try{
+      const res = await fetch('/api/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+      const data = await res.json();
+      if(!res.ok || !data.ok){ throw new Error(data.error || ('HTTP '+res.status)); }
+
+      // Show it immediately…
+      openHtml(data.reportHtml, (data.range && data.range.label) ? data.range.label+' (new)' : 'New report');
+
+      // …and hand over the two files to commit to GitHub.
+      downloadFile(data.fileName, data.reportHtml, 'text/html');
+      downloadFile('index.json', JSON.stringify(data.indexJson, null, 2), 'application/json');
+
+      setStatus('Generated for ' + (data.range?data.range.label:'last week') + '.', 'ok');
+      note.innerHTML = '<b>Two files were downloaded.</b> To make this week permanent in the hub: '
+        + 'move <code>' + escapeHtml(data.fileName) + '</code> into the <code>reports/</code> folder, replace '
+        + '<code>reports/index.json</code> with the downloaded <code>index.json</code>, then commit &amp; push to GitHub. '
+        + 'DeployBay will redeploy and the new week will appear here.';
+      note.classList.add('show');
+    }catch(e){
+      setStatus('Could not generate: ' + e.message, 'err');
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  loadIndex();
+</script>
+</body>
+</html>

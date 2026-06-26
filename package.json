@@ -1,0 +1,17 @@
+{
+  "name": "weekly-support-ai-insights",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Generator + hub for DoorLoop's weekly Fin human-escape report, powered by the Intercom API.",
+  "scripts": {
+    "start": "node server/server.js",
+    "selftest": "node server/selftest.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

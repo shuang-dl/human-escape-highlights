@@ -6,7 +6,10 @@
 // way the final list is restricted to conversations that Fin escalated to a human and
 // that were started by a real user.
 
-const SEARCH_URL = "https://api.intercom.com/conversations/search";
+// Intercom's API host. US = https://api.intercom.io (default). EU/AU workspaces
+// can override via the INTERCOM_API_BASE env var (https://api.eu.intercom.io or
+// https://api.au.intercom.io).
+const DEFAULT_BASE = "https://api.intercom.io";
 
 function authHeaders(token, version) {
   return {
@@ -17,7 +20,8 @@ function authHeaders(token, version) {
   };
 }
 
-async function runSearch(query, { token, version, maxPages }) {
+async function runSearch(query, { token, version, maxPages, base }) {
+  const url = `${base}/conversations/search`;
   const all = [];
   let startingAfter = null;
   for (let page = 0; page < maxPages; page++) {
@@ -25,11 +29,18 @@ async function runSearch(query, { token, version, maxPages }) {
       query,
       pagination: { per_page: 150, ...(startingAfter ? { starting_after: startingAfter } : {}) }
     };
-    const res = await fetch(SEARCH_URL, {
-      method: "POST",
-      headers: authHeaders(token, version),
-      body: JSON.stringify(body)
-    });
+    let res;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: authHeaders(token, version),
+        body: JSON.stringify(body)
+      });
+    } catch (netErr) {
+      throw new Error(`Could not reach the Intercom API at ${base} (network error: ${netErr.message}). ` +
+        `Check that the deploy host allows outbound internet, and that the region is right ` +
+        `(set INTERCOM_API_BASE to https://api.eu.intercom.io or https://api.au.intercom.io if your workspace is EU/AU).`);
+    }
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       const err = new Error(`Intercom search failed (HTTP ${res.status}): ${text.slice(0, 300)}`);
@@ -62,9 +73,10 @@ function isUserInitiated(c) {
 export async function fetchEscalatedConversations(range, {
   token,
   version = "2.11",
-  maxPages = 60
+  maxPages = 60,
+  base = DEFAULT_BASE
 } = {}) {
-  if (!token) throw new Error("INTERCOM_TOKEN is not set.");
+  if (!token) throw new Error("Intercom token is not set.");
 
   const dateClauses = [
     { field: "created_at", operator: ">", value: range.startUnix },
@@ -76,14 +88,14 @@ export async function fetchEscalatedConversations(range, {
     // Preferred: let Intercom filter to escalated server-side (much smaller pull).
     conversations = await runSearch(
       { operator: "AND", value: [...dateClauses, { field: "ai_agent.resolution_state", operator: "=", value: "escalated" }] },
-      { token, version, maxPages }
+      { token, version, maxPages, base }
     );
   } catch (e) {
     if (e.status && e.status >= 400 && e.status < 500) {
       // Field not searchable on this workspace — fall back to date-only, filter in code.
       conversations = await runSearch(
         { operator: "AND", value: dateClauses },
-        { token, version, maxPages }
+        { token, version, maxPages, base }
       );
     } else {
       throw e;

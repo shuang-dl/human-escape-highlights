@@ -22,6 +22,7 @@ const PORT = process.env.PORT || 80;
 // Accept either name so it works regardless of how the secret is labeled in your host.
 const TOKEN = process.env.INTERCOM_TOKEN || process.env.INTERCOM_API_KEY || "";
 const VERSION = process.env.INTERCOM_VERSION || "2.11";
+const API_BASE = process.env.INTERCOM_API_BASE || "https://api.intercom.io";
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -54,7 +55,7 @@ app.post("/api/generate", async (req, res) => {
       });
     }
     const range = previousWorkWeek();
-    const conversations = await fetchEscalatedConversations(range, { token: TOKEN, version: VERSION });
+    const conversations = await fetchEscalatedConversations(range, { token: TOKEN, version: VERSION, base: API_BASE });
     const agg = aggregate(conversations);
     const { html, entry, fileName } = buildReport(agg, range);
     const indexJson = mergedIndex(entry);

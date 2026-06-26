@@ -1,15 +1,13 @@
 // Thin Intercom API client: pull the escalated Fin conversations for a date range.
 //
-// We use the Search Conversations endpoint, filtered by created_at. We try to also
-// filter server-side by Fin's resolution state; if that field isn't searchable on
-// this workspace, we fall back to a created_at-only search and filter in code. Either
-// way the final list is restricted to conversations that Fin escalated to a human and
-// that were started by a real user.
+// We filter server-side by created_at AND Fin's resolution state. The "escalated"
+// value was previously named "routed_to_team", so we try both (depending on the
+// API version the workspace honors). We deliberately do NOT fall back to pulling
+// every conversation for the week — that can be huge and time out behind a gateway.
 
-// Intercom's API host. US = https://api.intercom.io (default). EU/AU workspaces
-// can override via the INTERCOM_API_BASE env var (https://api.eu.intercom.io or
-// https://api.au.intercom.io).
 const DEFAULT_BASE = "https://api.intercom.io";
+const PAGE_TIMEOUT_MS = 20000;       // per-request safety timeout
+const ESCALATED_VALUES = ["escalated", "routed_to_team"];
 
 function authHeaders(token, version) {
   return {
@@ -20,7 +18,35 @@ function authHeaders(token, version) {
   };
 }
 
-async function runSearch(query, { token, version, maxPages, base }) {
+async function postJson(url, body, { token, version }) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), PAGE_TIMEOUT_MS);
+  let res;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: authHeaders(token, version),
+      body: JSON.stringify(body),
+      signal: ctrl.signal
+    });
+  } catch (netErr) {
+    if (netErr.name === "AbortError") {
+      throw new Error(`Intercom request timed out after ${PAGE_TIMEOUT_MS / 1000}s.`);
+    }
+    throw new Error(`Could not reach the Intercom API at ${url} (network error: ${netErr.message}).`);
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    const err = new Error(`Intercom API returned HTTP ${res.status}: ${text.slice(0, 300)}`);
+    err.status = res.status;
+    throw err;
+  }
+  return res.json();
+}
+
+async function searchAllPages(query, { token, version, maxPages, base }) {
   const url = `${base}/conversations/search`;
   const all = [];
   let startingAfter = null;
@@ -29,25 +55,7 @@ async function runSearch(query, { token, version, maxPages, base }) {
       query,
       pagination: { per_page: 150, ...(startingAfter ? { starting_after: startingAfter } : {}) }
     };
-    let res;
-    try {
-      res = await fetch(url, {
-        method: "POST",
-        headers: authHeaders(token, version),
-        body: JSON.stringify(body)
-      });
-    } catch (netErr) {
-      throw new Error(`Could not reach the Intercom API at ${base} (network error: ${netErr.message}). ` +
-        `Check that the deploy host allows outbound internet, and that the region is right ` +
-        `(set INTERCOM_API_BASE to https://api.eu.intercom.io or https://api.au.intercom.io if your workspace is EU/AU).`);
-    }
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      const err = new Error(`Intercom search failed (HTTP ${res.status}): ${text.slice(0, 300)}`);
-      err.status = res.status;
-      throw err;
-    }
-    const data = await res.json();
+    const data = await postJson(url, body, { token, version });
     for (const c of (data.conversations || [])) all.push(c);
     startingAfter = data?.pages?.next?.starting_after || null;
     if (!startingAfter) break;
@@ -55,17 +63,15 @@ async function runSearch(query, { token, version, maxPages, base }) {
   return all;
 }
 
-// A conversation counts as an escalation-to-human if Fin's resolution state is
-// "escalated". We check both the structured field and the custom attribute, since
-// either may be present depending on workspace configuration.
+// Escalated if Fin's resolution state is "escalated" (or the older "routed_to_team").
 export function isEscalated(c) {
-  const state = c?.ai_agent?.resolution_state
-    || c?.custom_attributes?.["Fin AI Agent resolution state"];
-  return String(state || "").toLowerCase() === "escalated";
+  const state = String(c?.ai_agent?.resolution_state || "").toLowerCase();
+  if (state === "escalated" || state === "routed_to_team") return true;
+  const attr = String(c?.custom_attributes?.["Fin AI Agent resolution state"] || "").toLowerCase();
+  return attr === "escalated" || attr === "routed to team";
 }
 
 function isUserInitiated(c) {
-  // Mirrors the old "type = USER" filter (exclude leads/visitors where typed).
   const t = c?.source?.author?.type;
   return !t || t === "user";
 }
@@ -73,7 +79,7 @@ function isUserInitiated(c) {
 export async function fetchEscalatedConversations(range, {
   token,
   version = "2.11",
-  maxPages = 60,
+  maxPages = 40,
   base = DEFAULT_BASE
 } = {}) {
   if (!token) throw new Error("Intercom token is not set.");
@@ -83,25 +89,31 @@ export async function fetchEscalatedConversations(range, {
     { field: "created_at", operator: "<", value: range.endUnix }
   ];
 
-  let conversations;
-  try {
-    // Preferred: let Intercom filter to escalated server-side (much smaller pull).
-    conversations = await runSearch(
-      { operator: "AND", value: [...dateClauses, { field: "ai_agent.resolution_state", operator: "=", value: "escalated" }] },
-      { token, version, maxPages, base }
-    );
-  } catch (e) {
-    if (e.status && e.status >= 400 && e.status < 500) {
-      // Field not searchable on this workspace — fall back to date-only, filter in code.
-      conversations = await runSearch(
-        { operator: "AND", value: dateClauses },
-        { token, version, maxPages, base }
-      );
-    } else {
-      throw e;
+  // Try each resolution-state value; keep the first non-empty result.
+  let conversations = null;
+  let lastClientError = null;
+  for (const value of ESCALATED_VALUES) {
+    const query = {
+      operator: "AND",
+      value: [...dateClauses, { field: "ai_agent.resolution_state", operator: "=", value }]
+    };
+    try {
+      const result = await searchAllPages(query, { token, version, maxPages, base });
+      if (result.length) { conversations = result; break; }
+      if (conversations === null) conversations = result;   // remember a valid empty result
+    } catch (e) {
+      if (e.status && e.status >= 400 && e.status < 500) { lastClientError = e; continue; }
+      throw e;   // network/timeout/5xx — surface as-is
     }
   }
 
-  // Defensive final filter (works regardless of which path above ran).
+  if (conversations === null) {
+    throw new Error(
+      `Intercom rejected the resolution-state filter (${lastClientError?.message || "client error"}). ` +
+      `The API token may lack Fin AI Agent access, or the API version may need updating ` +
+      `(set INTERCOM_VERSION to a newer value).`
+    );
+  }
+
   return conversations.filter((c) => isEscalated(c) && isUserInitiated(c));
 }

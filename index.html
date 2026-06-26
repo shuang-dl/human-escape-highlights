@@ -167,6 +167,14 @@
     setStatus('Working… pulling last week\'s escalations from Intercom (this can take up to a minute).');
     try{
       const res = await fetch('/api/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+      const ct = res.headers.get('content-type') || '';
+      if(!ct.includes('application/json')){
+        const text = await res.text();
+        throw new Error('Server sent a non-data response (HTTP ' + res.status + '). '
+          + (res.status===504 || res.status===502 ? 'Looks like the request timed out — the Intercom pull took too long. '
+             : '')
+          + 'First bit: ' + text.replace(/\s+/g,' ').slice(0,120));
+      }
       const data = await res.json();
       if(!res.ok || !data.ok){ throw new Error(data.error || ('HTTP '+res.status)); }
 

@@ -62,9 +62,9 @@ The app is containerized so DeployBay can build and run it from the GitHub repo.
 
 1. Push this folder to a GitHub repo.
 2. In DeployBay, create an app from the repo. It detects the `Dockerfile` and builds it.
-3. **Add a secret/environment variable** named `INTERCOM_TOKEN` with your Intercom API access
-   token (an admin creates this in Intercom's Developer Hub). The app reads the token from there —
-   it is never stored in the code or the repo.
+3. **Add a secret/environment variable** named `INTERCOM_API_KEY` (or `INTERCOM_TOKEN` — the app
+   accepts either) with your Intercom API access token (an admin creates this in Intercom's
+   Developer Hub). The app reads the token from there — it is never stored in the code or the repo.
 4. Port: the app listens on `80` by default, or on `$PORT` if DeployBay provides one. No change needed.
 
 Optional environment variables: `INTERCOM_VERSION` (default `2.11`), `TZ` (default `America/New_York`,
@@ -74,7 +74,7 @@ used to decide the work-week boundaries).
 
 ```bash
 docker build -t insights-hub .
-docker run -p 8080:80 -e INTERCOM_TOKEN=your_token_here insights-hub
+docker run -p 8080:80 -e INTERCOM_API_KEY=your_token_here insights-hub
 # then open http://localhost:8080
 ```
 

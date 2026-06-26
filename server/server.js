@@ -19,7 +19,8 @@ const REPORTS_DIR = path.join(ROOT, "reports");
 const INDEX_JSON = path.join(REPORTS_DIR, "index.json");
 
 const PORT = process.env.PORT || 80;
-const TOKEN = process.env.INTERCOM_TOKEN || "";
+// Accept either name so it works regardless of how the secret is labeled in your host.
+const TOKEN = process.env.INTERCOM_TOKEN || process.env.INTERCOM_API_KEY || "";
 const VERSION = process.env.INTERCOM_VERSION || "2.11";
 
 const app = express();
@@ -49,7 +50,7 @@ app.post("/api/generate", async (req, res) => {
     if (!TOKEN) {
       return res.status(400).json({
         ok: false,
-        error: "INTERCOM_TOKEN is not set. Add it as a secret/environment variable in your deploy settings."
+        error: "Intercom token not set. Add a secret named INTERCOM_API_KEY (or INTERCOM_TOKEN) in your deploy settings."
       });
     }
     const range = previousWorkWeek();

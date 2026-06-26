@@ -3,12 +3,19 @@
     {
       "id": "rpt-2026-06-15-19",
       "weekLabel": "Jun 15 – 19, 2026",
-      "dateRange": { "start": "2026-06-15", "end": "2026-06-19" },
-      "generatedOn": "2026-06-25",
+      "dateRange": {
+        "start": "2026-06-15",
+        "end": "2026-06-19"
+      },
+      "generatedOn": "2026-06-26",
       "file": "reports/weekly-support-ai-insights-jun15-19-2026.html",
-      "totalEscalated": 623,
-      "headline": "623 escalations to a human · top issue: Deposits & payouts (93)",
-      "chips": ["Deposits 93", "Leases 84", "Merchant accounts 40"]
+      "totalEscalated": 618,
+      "headline": "618 escalations to a human · top issue: Tenant Payments (93)",
+      "chips": [
+        "Tenant Payments 93",
+        "Subscription and Billing 73",
+        "Accounting 71"
+      ]
     }
   ]
 }

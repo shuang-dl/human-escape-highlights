@@ -3,359 +3,165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weekly Support AI Insights — Jun 15–19, 2026</title>
+<title>Weekly Support AI Insights — Jun 15 – 19, 2026</title>
 <style>
-  :root{
-    --navy:#0b1f3a;
-    --blue:#1f6feb;
-    --blue-soft:#eaf1fe;
-    --ink:#1a2230;
-    --muted:#5b6675;
-    --line:#e3e8ef;
-    --bg:#f6f8fb;
-    --green:#1f9d6b;
-    --amber:#c98a00;
-    --red:#d64545;
-    --card:#ffffff;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    color:var(--ink);
-    background:var(--bg);
-    line-height:1.45;
-    font-size:14px;
-  }
-  .page{
-    max-width:1040px;
-    margin:0 auto;
-    padding:28px 30px 40px;
-  }
-  header.report-head{
-    border-left:6px solid var(--blue);
-    padding:4px 0 4px 16px;
-    margin-bottom:18px;
-  }
-  header.report-head .eyebrow{
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    font-size:11px;
-    font-weight:700;
-    color:var(--blue);
-    margin:0 0 4px;
-  }
-  header.report-head h1{
-    font-size:23px;
-    margin:0 0 6px;
-    color:var(--navy);
-    line-height:1.2;
-  }
-  header.report-head .meta{
-    font-size:12.5px;
-    color:var(--muted);
-  }
-  header.report-head .meta strong{color:var(--ink);}
-
-  .metrics{
-    display:grid;
-    grid-template-columns:repeat(6,1fr);
-    gap:10px;
-    margin:18px 0 22px;
-  }
-  .metric{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:12px 12px 11px;
-  }
-  .metric .val{font-size:20px;font-weight:700;color:var(--navy);}
-  .metric .lbl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;line-height:1.25;}
-  .metric.flag .val{color:var(--blue);}
-
-  h2.section{
-    font-size:13px;
-    text-transform:uppercase;
-    letter-spacing:.06em;
-    color:var(--muted);
-    border-bottom:2px solid var(--line);
-    padding-bottom:6px;
-    margin:26px 0 14px;
-  }
-
-  .issue{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:16px 18px;
-    margin-bottom:14px;
-  }
-  .issue-top{
-    display:flex;
-    align-items:flex-start;
-    gap:12px;
-    margin-bottom:8px;
-  }
-  .rank{
-    flex:0 0 auto;
-    width:30px;height:30px;
-    border-radius:50%;
-    background:var(--navy);
-    color:#fff;
-    font-weight:700;
-    font-size:15px;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .issue-title{flex:1 1 auto;}
-  .issue-title h3{margin:0;font-size:16.5px;color:var(--navy);}
-  .issue-title .sub{font-size:12px;color:var(--muted);margin-top:2px;}
-  .stats{
-    flex:0 0 auto;
-    text-align:right;
-    font-size:11.5px;
-    color:var(--muted);
-    white-space:nowrap;
-  }
-  .stats .big{font-size:18px;font-weight:700;color:var(--ink);display:block;}
-  .pill{
-    display:inline-block;
-    font-size:10.5px;
-    font-weight:600;
-    padding:2px 8px;
-    border-radius:999px;
-    margin-top:4px;
-  }
-  .pill.cx-ok{background:#e7f6ef;color:var(--green);}
-  .pill.cx-mid{background:#fbf2dc;color:var(--amber);}
-  .pill.cx-low{background:#fbe6e6;color:var(--red);}
-
-  .issue p.lead{margin:6px 0 10px;font-size:13.5px;}
-  .issue .lead b{color:var(--navy);}
-
-  .breakdown{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    margin-top:6px;
-  }
-  .breakdown .col h4{
-    margin:0 0 5px;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.05em;
-    color:var(--blue);
-  }
-  .breakdown ul{margin:0;padding-left:16px;}
-  .breakdown li{margin-bottom:4px;font-size:12.5px;}
-  .quotes li{color:var(--muted);font-style:italic;}
-  .quotes li span{font-style:normal;color:#9aa3b0;}
-
-  .callout{
-    background:var(--blue-soft);
-    border:1px solid #cfe0fd;
-    border-left:5px solid var(--blue);
-    border-radius:10px;
-    padding:14px 16px;
-    margin:8px 0 6px;
-  }
-  .callout h3{margin:0 0 5px;font-size:14.5px;color:var(--navy);}
-  .callout p{margin:0;font-size:13px;}
-
-  footer.notes{
-    margin-top:24px;
-    border-top:1px solid var(--line);
-    padding-top:12px;
-    font-size:11px;
-    color:var(--muted);
-  }
-  footer.notes b{color:var(--ink);}
-  footer.notes ul{margin:6px 0 0;padding-left:16px;}
-  footer.notes li{margin-bottom:3px;}
-
-  @media print{
-    body{background:#fff;font-size:12px;}
-    .page{max-width:none;padding:0;}
-    .issue,.metric,.callout{break-inside:avoid;}
-  }
+  :root{--navy:#0b1f3a;--blue:#1f6feb;--blue-soft:#eaf1fe;--ink:#1a2230;--muted:#5b6675;--line:#e3e8ef;--bg:#f6f8fb;--green:#1f9d6b;--amber:#c98a00;--red:#d64545;--card:#fff;}
+  *{box-sizing:border-box;} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45;font-size:14px;}
+  .page{max-width:1040px;margin:0 auto;padding:26px 28px 40px;}
+  header.r{border-left:6px solid var(--blue);padding:4px 0 4px 16px;margin-bottom:16px;}
+  header.r .eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:700;color:var(--blue);margin:0 0 4px;}
+  header.r h1{font-size:22px;margin:0 0 6px;color:var(--navy);}
+  header.r .meta{font-size:12.5px;color:var(--muted);}
+  .metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:18px 0 14px;}
+  .metric{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;}
+  .metric .val{font-size:19px;font-weight:700;color:var(--navy);} .metric.flag .val{color:var(--blue);}
+  .metric .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-top:3px;}
+  .share{font-size:13px;color:var(--muted);margin:0 0 6px;} .share b{color:var(--ink);}
+  h2.section{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:6px;margin:24px 0 14px;}
+  .issue{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:13px;}
+  .issue-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;}
+  .rank{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;}
+  .issue-title{flex:1 1 auto;} .issue-title h3{margin:0;font-size:16px;color:var(--navy);} .issue-title .sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .stats{flex:0 0 auto;text-align:right;font-size:11.5px;color:var(--muted);white-space:nowrap;} .stats .big{font-size:18px;font-weight:700;color:var(--ink);display:block;}
+  .pill{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:4px;}
+  .pill.s-neg{background:#fbe6e6;color:var(--red);} .pill.s-pos{background:#e7f6ef;color:var(--green);} .pill.s-neu{background:#eef1f5;color:var(--muted);} .pill.s-mix{background:#fbf2dc;color:var(--amber);}
+  .breakdown{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px;}
+  .breakdown h4{margin:0 0 5px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);}
+  .breakdown ul{margin:0;padding-left:16px;} .breakdown li{margin-bottom:4px;font-size:12.5px;}
+  .quotes li{color:var(--muted);font-style:italic;} .quotes li span{font-style:normal;color:#9aa3b0;}
+  footer.notes{margin-top:22px;border-top:1px solid var(--line);padding-top:12px;font-size:11px;color:var(--muted);}
+  footer.notes b{color:var(--ink);} footer.notes ul{margin:6px 0 0;padding-left:16px;} footer.notes li{margin-bottom:3px;}
+  @media print{body{background:#fff;} .page{max-width:none;padding:0;} .issue,.metric{break-inside:avoid;}}
 </style>
 </head>
 <body>
 <div class="page">
-
-  <header class="report-head">
+  <header class="r">
     <p class="eyebrow">Weekly Support AI Insights · Human-Escape Loop</p>
     <h1>Top UI Issues Driving Fin Failures &amp; Human Escalations</h1>
-    <p class="meta">
-      Reporting week: <strong>Monday Jun 15 – Friday Jun 19, 2026</strong> &nbsp;·&nbsp;
-      Prepared for <strong>Product / R&amp;D</strong> &nbsp;·&nbsp;
-      Source: <strong>Intercom · Fin AI Agent · Topics Explorer</strong> &nbsp;·&nbsp;
-      Filter: type = USER, resolution state = Escalated
-    </p>
+    <div class="meta">Reporting week: <b>Jun 15 – 19, 2026</b> · Generated 2026-06-26 · Prepared for Product / R&amp;D ·
+      Source: <b>Intercom API</b> (Search Conversations; Fin resolution state = Escalated, user-initiated)</div>
   </header>
 
-  <!-- Weekly context -->
   <div class="metrics">
-    <div class="metric"><div class="val">2,781</div><div class="lbl">Total support volume</div></div>
-    <div class="metric"><div class="val">78.4%</div><div class="lbl">Fin involvement rate</div></div>
-    <div class="metric"><div class="val">69.4%</div><div class="lbl">Fin resolution rate</div></div>
-    <div class="metric"><div class="val">54.4%</div><div class="lbl">Automation rate</div></div>
-    <div class="metric"><div class="val">75.1%</div><div class="lbl">CX score</div></div>
-    <div class="metric flag"><div class="val">623</div><div class="lbl">Escalated to a human</div></div>
+    <div class="metric flag"><div class="val">618</div><div class="lbl">Escalated to a human</div></div>
+    <div class="metric"><div class="val">33</div><div class="lbl">Distinct topics</div></div>
+    <div class="metric"><div class="val">38%</div><div class="lbl">Top 3 share</div></div>
+    <div class="metric"><div class="val">202</div><div class="lbl">Negative sentiment</div></div>
+    <div class="metric"><div class="val">310</div><div class="lbl">Neutral</div></div>
+    <div class="metric"><div class="val">89</div><div class="lbl">Positive</div></div>
   </div>
+  <p class="share">The top 3 fixable issues below account for <b>237 of 618 escalations (38%)</b>.</p>
 
-  <p style="font-size:13px;color:var(--muted);margin:-8px 0 0;">
-    Fin handed <strong style="color:var(--ink)">623</strong> conversations to a human this week. The 3 topics below account for
-    <strong style="color:var(--ink)">217 of them (≈35%)</strong> — the highest-volume, most fixable sources of friction.
-  </p>
-
-  <h2 class="section">Top 3 UI issues this week</h2>
-
-  <!-- ISSUE 1 -->
-  <div class="issue">
-    <div class="issue-top">
-      <div class="rank">1</div>
-      <div class="issue-title">
-        <h3>Deposits &amp; payouts — "paid in DoorLoop, but not in my bank"</h3>
-        <div class="sub">Payment status, payout timing, and bank reconciliation</div>
+  <h2 class="section">Top 3 fixable issues this week</h2>
+  
+    <div class="issue">
+      <div class="issue-top">
+        <div class="rank">1</div>
+        <div class="issue-title">
+          <h3>Tenant Payments</h3>
+          <div class="sub">Grouped from Intercom's AI category fields</div>
+        </div>
+        <div class="stats"><span class="big">93</span>escalations · 15% of all<br><span class="pill s-neu">Neutral</span></div>
       </div>
-      <div class="stats">
-        <span class="big">93</span>
-        escalations · 15% of all
-        <br><span class="pill cx-mid">CX 64.1%</span>
+      <div class="breakdown">
+        <div class="col">
+          <h4>Sub-categories in this topic</h4>
+          <ul>
+          <li><b>Bug / Something Broken</b> — 36</li>
+          <li><b>Tenant Payments</b> — 25</li>
+          <li><b>How-to / Usage Question</b> — 22</li>
+          <li><b>Setup &amp; Feature Activation</b> — 9</li>
+          <li><b>Cancellation / Churn Risk</b> — 1</li>
+          </ul>
+        </div>
+        <div class="col quotes">
+          <h4>Example escalations (customer's opening message)</h4>
+          <ul>
+          <li>"I have been waiting for more than a week for Bank of America - 2743 merchant setup and it still shows Action Required" <span>(Negative)</span></li>
+          <li>"Hello, My tenant is unable to make payment. Please fix. Hello? log" <span>(Unknown)</span></li>
+          <li>"hi! 1517 Stanley paid $75. there was a dispute between her and her bank. she had a reversal charge but then got charged another reversal fee for some reason when she onl…" <span>(Neutral)</span></li>
+          <li>"i changed my business number i do not have access to the old and need to update the phone number" <span>(Negative)</span></li>
+          <li>"Hi my tenant tried linking their bank account to many times, and wasn&#39;t entering the code in time to link their account. Now Stripe has locked them out and won&#39;t let the…" <span>(Positive)</span></li>
+          </ul>
+        </div>
       </div>
     </div>
-    <p class="lead">
-      The dominant pattern: a payment shows as <b>paid / deposited</b> inside DoorLoop, but the money isn't in the
-      customer's bank — or the amounts don't match. Users can't reconcile what the app shows against their bank statement,
-      and Fin can't resolve a real funds-movement discrepancy, so it escalates.
-    </p>
-    <div class="breakdown">
-      <div class="col">
-        <h4>Where it breaks (UI / product)</h4>
-        <ul>
-          <li><b>Payout visibility:</b> "Paid" status with no money received, and no in-app explanation of holds or timing.</li>
-          <li><b>Bank reconciliation:</b> deposits show as <i>uncleared</i> but don't appear in bank transactions; bundled deposits can't be matched; can't add/delete a transaction.</li>
-          <li><b>Security deposit recording:</b> two-step charge-and-payment is confusing; withholding a deposit shows a negative / unexpected refund.</li>
-        </ul>
-      </div>
-      <div class="col quotes">
-        <h4>In customers' words</h4>
-        <ul>
-          <li>"Why was only $885 transferred when my tenant paid $1,250?" <span>(CX 1)</span></li>
-          <li>"Where is the money that shows as deposited but is not in my bank account?" <span>(CX 3)</span></li>
-          <li>"It shows paid on June 12th, but the money hasn't appeared after 5 days." <span>(CX 2)</span></li>
-          <li>"Why do deposits show as uncleared on reconciliation but don't appear under bank transactions?" <span>(CX 4)</span></li>
-          <li>"Why does the deposit tab show a negative number when I withhold the deposit?" <span>(CX 5)</span></li>
-        </ul>
-      </div>
-    </div>
-  </div>
 
-  <!-- ISSUE 2 -->
-  <div class="issue">
-    <div class="issue-top">
-      <div class="rank">2</div>
-      <div class="issue-title">
-        <h3>Leases — renewals, e-signature, and moving balances</h3>
-        <div class="sub">Lease lifecycle workflows</div>
+    <div class="issue">
+      <div class="issue-top">
+        <div class="rank">2</div>
+        <div class="issue-title">
+          <h3>Subscription and Billing</h3>
+          <div class="sub">Grouped from Intercom's AI category fields</div>
+        </div>
+        <div class="stats"><span class="big">73</span>escalations · 12% of all<br><span class="pill s-neu">Neutral</span></div>
       </div>
-      <div class="stats">
-        <span class="big">84</span>
-        escalations · 13% of all
-        <br><span class="pill cx-mid">CX 65.5%</span>
-      </div>
-    </div>
-    <p class="lead">
-      Escalations cluster in three lease workflows where the UI blocks users mid-task: <b>renewals</b>,
-      the <b>e-signature / document</b> flow, and <b>moving tenants or balances</b> between leases. These are
-      multi-step flows where a single error or missing button stops the user cold.
-    </p>
-    <div class="breakdown">
-      <div class="col">
-        <h4>Where it breaks (UI / product)</h4>
-        <ul>
-          <li><b>Renewals:</b> "dates conflict" errors, renewal offers auto-sent, renewed/month-to-month leases not appearing in the Renewals queue, double first-month charges.</li>
-          <li><b>E-signature / docs:</b> can't upload an existing signed lease for signature, missing signature field, <i>no Save button</i> on the template editor.</li>
-          <li><b>Moving tenants / balances:</b> can't transfer a balance or payment from a new lease back to the original; "NEXT" button disabled when ending a lease.</li>
-        </ul>
-      </div>
-      <div class="col quotes">
-        <h4>In customers' words</h4>
-        <ul>
-          <li>"Why is there no save button when I finish creating a lease template?" <span>(CX 2)</span></li>
-          <li>"Why can I only create a new lease and not upload an existing signed lease for signature?" <span>(CX 2)</span></li>
-          <li>"Why can't the tenant see the signature field on the renewal lease?" <span>(CX 4)</span></li>
-          <li>"How do I resolve the 'dates conflict' error when renewing my lease?" <span>(CX 3)</span></li>
-          <li>"How can I transfer the balance from the new lease back to the old lease?" <span>(CX 5)</span></li>
-        </ul>
+      <div class="breakdown">
+        <div class="col">
+          <h4>Sub-categories in this topic</h4>
+          <ul>
+          <li><b>Cancellation / Churn Risk</b> — 54</li>
+          <li><b>Bug / Something Broken</b> — 9</li>
+          <li><b>How-to / Usage Question</b> — 5</li>
+          <li><b>Subscription and Billing</b> — 3</li>
+          <li><b>Setup &amp; Feature Activation</b> — 2</li>
+          </ul>
+        </div>
+        <div class="col quotes">
+          <h4>Example escalations (customer's opening message)</h4>
+          <ul>
+          <li>"Merchant Account" <span>(Unknown)</span></li>
+          <li>"I would like to cancel this account. I was supposed to have my second onboarding session, but it appears to have been canceled. This software is not a good fit for us, a…" <span>(Negative)</span></li>
+          <li>"Id like to cancel my subscription" <span>(Neutral)</span></li>
+          <li>"Dear DoorLoop Support, We urgently need assistance regarding several accounting issues we have been experiencing within DoorLoop. I have reported these issues multiple t…" <span>(Negative)</span></li>
+          <li>"I need to cancel my plan today. How do I cancel my subscription to Doorloop?" <span>(Neutral)</span></li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ISSUE 3 -->
-  <div class="issue">
-    <div class="issue-top">
-      <div class="rank">3</div>
-      <div class="issue-title">
-        <h3>Merchant accounts — Stripe verification &amp; setup</h3>
-        <div class="sub">Getting set up and staying verified to receive payouts</div>
+    <div class="issue">
+      <div class="issue-top">
+        <div class="rank">3</div>
+        <div class="issue-title">
+          <h3>Accounting</h3>
+          <div class="sub">Grouped from Intercom's AI category fields</div>
+        </div>
+        <div class="stats"><span class="big">71</span>escalations · 11% of all<br><span class="pill s-neu">Neutral</span></div>
       </div>
-      <div class="stats">
-        <span class="big">40</span>
-        escalations · 6% of all
-        <br><span class="pill cx-mid">CX 53.8%</span>
-      </div>
-    </div>
-    <p class="lead">
-      Two sub-issues make up nearly all of this topic: <b>Stripe account access &amp; verification (18)</b> and
-      <b>merchant account setup &amp; application (17)</b>. Users get blocked or stuck onboarding to payments —
-      something Fin can't push through, so it escalates.
-    </p>
-    <div class="breakdown">
-      <div class="col">
-        <h4>Where it breaks (UI / product)</h4>
-        <ul>
-          <li><b>Verification loop:</b> repeated "verification incomplete" emails on accounts that already show active/verified; re-verification triggered by an address mismatch.</li>
-          <li><b>Setup friction:</b> users say the merchant application "is not straightforward"; verification codes sent to old email/phone; tenants blocked after too many attempts.</li>
-          <li><b>Silent failures:</b> card payments show "in progress" to the tenant but leave no record in DoorLoop or Stripe.</li>
-        </ul>
-      </div>
-      <div class="col quotes">
-        <h4>In customers' words</h4>
-        <ul>
-          <li>"Why am I still getting 'verification incomplete' emails when my accounts are active and verified?" <span>(CX 5)</span></li>
-          <li>"Why am I being asked to re-verify all my merchant accounts due to an address issue?" <span>(CX 2)</span></li>
-          <li>"How can I verify my bank account if Stripe sends codes to my old, deactivated email and phone?" <span>(CX 3)</span></li>
-          <li>"Card payments show 'in progress' but leave no record — silent failures." <span>(CX 4)</span></li>
-          <li>"Why can't I complete Stripe verification due to the questions asked about my account?" <span>(CX 3)</span></li>
-        </ul>
+      <div class="breakdown">
+        <div class="col">
+          <h4>Sub-categories in this topic</h4>
+          <ul>
+          <li><b>Accounting</b> — 27</li>
+          <li><b>Bug / Something Broken</b> — 22</li>
+          <li><b>How-to / Usage Question</b> — 20</li>
+          <li><b>Cancellation / Churn Risk</b> — 2</li>
+          </ul>
+        </div>
+        <div class="col quotes">
+          <h4>Example escalations (customer's opening message)</h4>
+          <ul>
+          <li>"Hi this is my bank account for property at 79th ave, Tenant paid $300 ON 6/4 through electronic deposit through e-pay but it hasnt hit our account. Please advise why it…" <span>(Negative)</span></li>
+          <li>"Hi, can you help me delete this late fee for 422 N Topping Ave. I tried to delete it on my end but won&#39;t go through." <span>(Neutral)</span></li>
+          <li>"Hi my funds from my tenant got stuck again" <span>(Neutral)</span></li>
+          <li>"Can you tell me what tenant payments these two transactions match up to? They look like maybe they are one of the unapplied rent payments but the system will not let me…" <span>(Neutral)</span></li>
+          <li>"Dear DoorLoop Support, We urgently need assistance regarding several accounting issues we have been experiencing within DoorLoop. I have reported these issues multiple t…" <span>(Negative)</span></li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
-
-  <h2 class="section">Cross-cutting root cause</h2>
-  <div class="callout">
-    <h3>⚠ The Stripe payment-processing migration is feeding both #1 and #3</h3>
-    <p>
-      In multiple escalations, the support team's own explanation points to the in-progress migration to a new Stripe
-      payment structure that adds a <b>high-risk holding period</b>. During the hold, DoorLoop displays the full
-      pre-hold payout amount while the bank receives less — so the app's numbers don't match the bank, generating
-      "missing funds," "$1 off," and reconciliation escalations. Reporting also lags. This single backend change is a
-      meaningful driver of <b>Deposits</b> and <b>Merchant accounts</b> volume — worth aligning Product, Payments, and CX
-      on messaging and in-app transparency while the migration completes.
-    </p>
-  </div>
 
   <footer class="notes">
     <b>How this was built &amp; caveats</b>
     <ul>
-      <li><b>Source &amp; scope:</b> Intercom → Fin AI Agent → Topics Explorer, filtered to type = USER and Fin resolution state = Escalated, Jun 15–19, 2026. Weekly metrics from the Fin Performance funnel (same filter).</li>
-      <li><b>Topics are AI-generated</b> by Intercom (no manual failure tags yet). Each conversation is assigned one primary topic, so counts are directional, not exact root-cause tallies.</li>
-      <li><b>"UI issue" framing:</b> #1–#3 are the highest-volume topics that represent fixable product friction. <b>Subscription cancellation (45 escalations)</b> ranked higher by raw volume but is excluded here because those hand-offs are by design — Fin is not permitted to cancel accounts. (Flagging separately: the path to reach a human during cancellation is itself confusing and drives negative sentiment.)</li>
-      <li><b>Top 10 escalated topics this week:</b> Deposits 93 · Leases 84 · Subscription cancellation 45 · Merchant accounts 40 · Tenant troubleshooting 33 · Bank account management 30 · Scheduling 28 · Tenant payment issues 28 · Account access 25 · Account cancellation 25.</li>
+      <li><b>Source &amp; scope:</b> Intercom API → Search Conversations, created 2026-06-15 to 2026-06-19, restricted to user-initiated conversations where Fin's resolution state is <b>Escalated</b>.</li>
+      <li><b>Topics</b> are grouped from Intercom's own AI category fields (Accounting Categories → Category Detection → Conversation Intent), so counts are <b>directional</b>, not exact root-cause tallies. CX Score is a paid-analytics metric not available via the API, so sentiment is shown instead.</li>
+      <li><b>"Fixable issue" framing:</b> the top 3 exclude by-design handoffs and non-actionable buckets. No higher-volume by-design handoffs were excluded this week.</li>
+      <li><b>All topics this week:</b> Tenant Payments 93 · Subscription and Billing 73 · Accounting 71 · Leasing 67 · Rental Applications 41 · Reconciliation 28 · PM Operations 25 · Reporting 24 · Portals 24 · Plaid / BankConnect 18 · Merchant Account &amp; Stripe 16 · Onboarding and Implementation 16 · Uncategorized 16 · Bills &amp; Expenses 13 · Chart of Accounts 12 · Communications 12 · Outgoing Payments / Checkbook.io 12 · Dropbox Sign / Electronic Signatures 12 · Online Listings 8 · Tenant Screenings / TransUnion 8 · Tasks and Work Orders 7 · How-to / Usage Question 4 · DoorLoop AI Assistant 3 · Check Printing 3 · Setup &amp; Feature Activation 2 · Notes, Files, &amp; Tags 2 · Integrations 2 · Activation and Registration 1 · Inspections 1 · Tenant Experience 1 · Getting Started Flow 1 · Bug / Something Broken 1 · Budgeting 1.</li>
     </ul>
   </footer>
-
 </div>
 </body>
 </html>

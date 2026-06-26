@@ -172,14 +172,26 @@
 
   function onJobDone(result){
     openHtml(result.reportHtml, (result.range && result.range.label) ? result.range.label+' (new)' : 'New report');
+    const label = result.range ? result.range.label : 'last week';
+    const note = document.getElementById('note');
+
+    if(result.committed){
+      // Auto-commit succeeded — no downloads needed.
+      setStatus('Generated for ' + label + ' and committed to GitHub.', 'ok');
+      note.innerHTML = '<b>Committed to GitHub</b> (' + escapeHtml(result.repo||'repo') + '@' + escapeHtml(result.branch||'main') + '). '
+        + 'DeployBay will redeploy automatically and the new week will appear in this list shortly '
+        + '(give it a minute, then refresh).';
+      note.classList.add('show');
+      return;
+    }
+
+    // Fallback: GitHub not configured (or commit failed) — download the two files to commit manually.
     downloadFile(result.fileName, result.reportHtml, 'text/html');
     downloadFile('index.json', JSON.stringify(result.indexJson, null, 2), 'application/json');
-    setStatus('Generated for ' + (result.range?result.range.label:'last week') + '.', 'ok');
-    const note = document.getElementById('note');
-    note.innerHTML = '<b>Two files were downloaded.</b> To make this week permanent in the hub: '
-      + 'move <code>' + escapeHtml(result.fileName) + '</code> into the <code>reports/</code> folder, replace '
-      + '<code>reports/index.json</code> with the downloaded <code>index.json</code>, then commit &amp; push to GitHub. '
-      + 'DeployBay will redeploy and the new week will appear here.';
+    setStatus('Generated for ' + label + '.', 'ok');
+    note.innerHTML = (result.commitError ? '<b>Note:</b> auto-commit failed (' + escapeHtml(result.commitError) + '), so the files were downloaded instead.<br>' : '<b>Two files were downloaded.</b> ')
+      + 'To make this week permanent: move <code>' + escapeHtml(result.fileName) + '</code> into the <code>reports/</code> folder, replace '
+      + '<code>reports/index.json</code> with the downloaded <code>index.json</code>, then commit &amp; push to GitHub.';
     note.classList.add('show');
   }
 

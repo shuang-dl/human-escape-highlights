@@ -26,7 +26,7 @@ away, so the app now pulls everything straight from the **Intercom API** instead
 | Path | What it is |
 |------|------------|
 | `index.html` | **The hub.** Lists every week as a card; click one to read its report in a slide-out panel. Has the "Generate" button. |
-| `server/` | The app code (Node): `server.js` (web server + `/api/generate`), `intercom.js` (API calls), `aggregate.js` (grouping rules), `report.js` (report builder), `week.js` (date logic). |
+| `server/` | The app code (Node): `server.js` (web server + job runner), `intercom.js` (API calls), `aggregate.js` (grouping rules), `report.js` (report builder), `week.js` (date logic), `github.js` (auto-commit). |
 | `reports/` | The committed history: one HTML file per week, plus `index.json` (the list the hub reads). |
 | `package.json` | App dependencies (Express). |
 | `Dockerfile` / `.dockerignore` | How the app is built and run as a container (for DeployBay). |
@@ -36,13 +36,27 @@ away, so the app now pulls everything straight from the **Intercom API** instead
 ## Running a weekly report
 
 1. Open the deployed hub in your browser.
-2. Click **"Generate last week's report."** Give it up to a minute (it pages through Intercom).
-3. It shows the report and downloads **two files**: the week's `weekly-…html` and an updated `index.json`.
-4. Put the `weekly-…html` into `reports/`, replace `reports/index.json` with the downloaded one,
-   then **commit & push to GitHub**. DeployBay redeploys and the week appears in the hub.
+2. Click **"Generate last week's report."** It runs as a background job and shows live progress.
+3. **If GitHub auto-commit is configured** (see below): the app commits the report + updated
+   `index.json` to the repo itself. DeployBay redeploys and the week appears in the hub. Nothing to download.
+4. **If not configured:** the app downloads two files (`weekly-…html` + `index.json`) and you
+   commit them to `reports/` yourself, then push.
 
-(That commit step is the manual part you chose. If you later want it automatic, we can have the
-app commit to GitHub for you — that's an add-on.)
+### GitHub auto-commit (recommended)
+
+Set these as secrets/environment variables in DeployBay and the Generate button will update the
+repo directly — no downloads, no manual push:
+
+| Variable | What |
+|----------|------|
+| `GITHUB_TOKEN` | A GitHub token scoped to this repo with **Contents: read/write**. Use a fine-grained personal access token limited to the one repo. |
+| `GITHUB_REPO` | `owner/repo` for this project's repository. |
+| `GITHUB_BRANCH` | Branch to commit to (default `main`). |
+
+Create the token in GitHub → Settings → Developer settings → **Fine-grained tokens** → restrict it
+to this repository, with Repository permissions → **Contents: Read and write**. Paste it into
+DeployBay as `GITHUB_TOKEN`. The app reads it from there; it is never stored in the code or repo.
+If the token isn't set (or a commit fails), the app automatically falls back to the download method.
 
 ## Data source & caveats
 

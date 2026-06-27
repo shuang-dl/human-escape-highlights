@@ -1,6 +1,23 @@
 {
   "reports": [
     {
+      "id": "rpt-2026-06-22-26",
+      "weekLabel": "Jun 22 – 26, 2026",
+      "dateRange": {
+        "start": "2026-06-22",
+        "end": "2026-06-26"
+      },
+      "generatedOn": "2026-06-27",
+      "file": "reports/weekly-support-ai-insights-jun22-26-2026.html",
+      "totalEscalated": 541,
+      "headline": "541 escalations to a human · top issue: Leasing (75)",
+      "chips": [
+        "Leasing 75",
+        "Tenant Payments 66",
+        "Subscription and Billing 61"
+      ]
+    },
+    {
       "id": "rpt-2026-06-15-19",
       "weekLabel": "Jun 15 – 19, 2026",
       "dateRange": {

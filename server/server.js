@@ -16,6 +16,7 @@ import { previousWorkWeek } from "./week.js";
 import { fetchEscalatedConversations } from "./intercom.js";
 import { aggregate } from "./aggregate.js";
 import { buildReport } from "./report.js";
+import { githubConfig, commitReport } from "./github.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -30,7 +31,19 @@ const API_BASE = process.env.INTERCOM_API_BASE || "https://api.intercom.io";
 const app = express();
 app.use(express.json({ limit: "1mb" }));
 
-app.get("/api/health", (req, res) => res.json({ ok: true }));
+app.get("/api/health", (req, res) => {
+  const gh = githubConfig();
+  // Reports config status (booleans only — never the secret values) so you can confirm
+  // what the deployed app actually sees. "build" lets you verify the new code is live.
+  res.json({
+    ok: true,
+    build: "auto-commit-1",
+    intercomConfigured: Boolean(TOKEN),
+    githubConfigured: gh.enabled,
+    githubRepo: gh.repo || null,
+    githubBranch: gh.branch
+  });
+});
 
 // In-memory job store. Fine for a single instance; jobs are short-lived and it's OK to
 // lose them on restart (the user just clicks again).
@@ -68,16 +81,40 @@ async function runJob(jobId) {
     set({ stage: "building", message: `Building report from ${conversations.length} escalations…` });
     const agg = aggregate(conversations);
     const { html, entry, fileName } = buildReport(agg, range);
-    const indexJson = mergedIndex(entry);
+
+    const baseResult = {
+      range: { label: range.label, start: range.startISO, end: range.endISO },
+      entry, fileName, reportHtml: html
+    };
+
+    // If GitHub is configured, commit the files directly; otherwise return them for download.
+    const gh = githubConfig();
+    if (gh.enabled) {
+      try {
+        set({ stage: "committing", message: "Committing to GitHub…" });
+        const { indexJson, repo, branch } = await commitReport({ fileName, reportHtml: html, newEntry: entry });
+        set({
+          status: "done", stage: "done",
+          message: `Committed to GitHub (${repo}@${branch}). DeployBay will redeploy shortly.`,
+          result: { ...baseResult, committed: true, repo, branch, indexJson }
+        });
+        return;
+      } catch (commitErr) {
+        // Fall back to download so the run isn't lost.
+        console.error("commit failed:", commitErr);
+        set({
+          status: "done", stage: "done",
+          message: `Generated, but GitHub commit failed (${commitErr.message}). Falling back to download.`,
+          result: { ...baseResult, committed: false, commitError: commitErr.message, indexJson: mergedIndex(entry) }
+        });
+        return;
+      }
+    }
 
     set({
-      status: "done",
-      stage: "done",
+      status: "done", stage: "done",
       message: `Done — ${agg.totalEscalated} escalations.`,
-      result: {
-        range: { label: range.label, start: range.startISO, end: range.endISO },
-        entry, fileName, reportHtml: html, indexJson
-      }
+      result: { ...baseResult, committed: false, indexJson: mergedIndex(entry) }
     });
   } catch (err) {
     console.error("job failed:", err);

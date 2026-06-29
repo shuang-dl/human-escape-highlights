@@ -1,14 +1,38 @@
 {
   "reports": [
     {
+      "id": "rpt-2026-06-22-26",
+      "weekLabel": "Jun 22 – 26, 2026",
+      "dateRange": {
+        "start": "2026-06-22",
+        "end": "2026-06-26"
+      },
+      "generatedOn": "2026-06-29",
+      "file": "reports/weekly-support-ai-insights-jun22-26-2026.html",
+      "totalEscalated": 541,
+      "headline": "541 escalations to a human · top issue: Leasing (73)",
+      "chips": [
+        "Leasing 73",
+        "Tenant Payments 66",
+        "Subscription and Billing 61"
+      ]
+    },
+    {
       "id": "rpt-2026-06-15-19",
       "weekLabel": "Jun 15 – 19, 2026",
-      "dateRange": { "start": "2026-06-15", "end": "2026-06-19" },
+      "dateRange": {
+        "start": "2026-06-15",
+        "end": "2026-06-19"
+      },
       "generatedOn": "2026-06-25",
       "file": "reports/weekly-support-ai-insights-jun15-19-2026.html",
       "totalEscalated": 623,
       "headline": "623 escalations to a human · top issue: Deposits & payouts (93)",
-      "chips": ["Deposits 93", "Leases 84", "Merchant accounts 40"]
+      "chips": [
+        "Deposits 93",
+        "Leases 84",
+        "Merchant accounts 40"
+      ]
     }
   ]
 }

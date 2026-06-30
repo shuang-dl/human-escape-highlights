@@ -49,8 +49,8 @@ function issueCard(issue, rank) {
 }
 
 const STYLE = `
-  :root{--navy:#0b1f3a;--blue:#1f6feb;--blue-soft:#eaf1fe;--ink:#1a2230;--muted:#5b6675;--line:#e3e8ef;--bg:#f6f8fb;--green:#1f9d6b;--amber:#c98a00;--red:#d64545;--card:#fff;}
-  *{box-sizing:border-box;} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45;font-size:14px;}
+  :root{--navy:#162050;--blue:#3185fc;--blue-soft:#dbeaff;--ink:#333333;--muted:#727494;--line:#d0d5dd;--bg:#f0f3ff;--green:#01cc74;--amber:#f29a16;--red:#dd2686;--card:#ffffff;}
+  *{box-sizing:border-box;} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:14px;}
   .page{max-width:1040px;margin:0 auto;padding:26px 28px 40px;}
   header.r{border-left:6px solid var(--blue);padding:4px 0 4px 16px;margin-bottom:16px;}
   header.r .eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:700;color:var(--blue);margin:0 0 4px;}
@@ -68,7 +68,7 @@ const STYLE = `
   .issue-title{flex:1 1 auto;} .issue-title h3{margin:0;font-size:16px;color:var(--navy);} .issue-title .sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
   .stats{flex:0 0 auto;text-align:right;font-size:11.5px;color:var(--muted);white-space:nowrap;} .stats .big{font-size:18px;font-weight:700;color:var(--ink);display:block;}
   .pill{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:4px;}
-  .pill.s-neg{background:#fbe6e6;color:var(--red);} .pill.s-pos{background:#e7f6ef;color:var(--green);} .pill.s-neu{background:#eef1f5;color:var(--muted);} .pill.s-mix{background:#fbf2dc;color:var(--amber);}
+  .pill.s-neg{background:#ffedf4;color:#aa1e73;} .pill.s-pos{background:#e7f7f0;color:#018f55;} .pill.s-neu{background:#eceff8;color:#545454;} .pill.s-mix{background:#fdf0dc;color:#b5760f;}
   .breakdown{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px;}
   .breakdown h4{margin:0 0 5px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);}
   .breakdown ul{margin:0;padding-left:16px;} .breakdown li{margin-bottom:4px;font-size:12.5px;}

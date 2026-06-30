@@ -92,6 +92,26 @@ function mergeIndex(existing, newEntry) {
   return { reports };
 }
 
+// Fetch a single file's raw contents from the repo (used to serve reports live, so the
+// hub reflects new commits immediately without waiting for a redeploy). Returns the text,
+// or null if GitHub isn't configured or the file doesn't exist.
+export async function fetchRepoFile(repoPath) {
+  const cfg = githubConfig();
+  if (!cfg.enabled) return null;
+  const [owner, repo] = cfg.repo.split("/");
+  if (!owner || !repo) return null;
+  const encoded = repoPath.split("/").map(encodeURIComponent).join("/");
+  const url = `${cfg.api}/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(cfg.branch)}`;
+  const h = { ...headers(cfg.token), "Accept": "application/vnd.github.raw" };
+  const res = await fetch(url, { headers: h });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`GitHub GET ${repoPath} failed (HTTP ${res.status}): ${t.slice(0, 150)}`);
+  }
+  return res.text();
+}
+
 // Commit the report file + merged index.json. Returns the merged index that was written.
 export async function commitReport({ fileName, reportHtml, newEntry }) {
   const cfg = githubConfig();

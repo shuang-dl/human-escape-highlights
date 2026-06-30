@@ -177,12 +177,12 @@
     const note = document.getElementById('note');
 
     if(result.committed){
-      // Auto-commit succeeded — no downloads needed.
+      // Auto-commit succeeded — reports are served live from GitHub, so refresh the list now.
       setStatus('Generated for ' + label + ' and committed to GitHub.', 'ok');
       note.innerHTML = '<b>Committed to GitHub</b> (' + escapeHtml(result.repo||'repo') + '@' + escapeHtml(result.branch||'main') + '). '
-        + 'DeployBay will redeploy automatically and the new week will appear in this list shortly '
-        + '(give it a minute, then refresh).';
+        + 'Added to the list below.';
       note.classList.add('show');
+      setTimeout(loadIndex, 1500);   // re-fetch the (live) index so the new row appears
       return;
     }
 

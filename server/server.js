@@ -16,7 +16,7 @@ import { previousWorkWeek } from "./week.js";
 import { fetchEscalatedConversations } from "./intercom.js";
 import { aggregate } from "./aggregate.js";
 import { buildReport } from "./report.js";
-import { githubConfig, commitReport } from "./github.js";
+import { githubConfig, commitReport, fetchRepoFile } from "./github.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -143,6 +143,30 @@ app.get("/api/generate/status/:id", (req, res) => {
 });
 
 app.get("/", (req, res) => res.sendFile(path.join(ROOT, "index.html")));
-app.use("/reports", express.static(REPORTS_DIR));
+
+// Serve the report files. Prefer LIVE from GitHub (so new commits show up immediately,
+// no redeploy needed); fall back to the baked-in files if GitHub is off/unreachable.
+app.get(/^\/reports\/(.+)$/, async (req, res) => {
+  const rel = req.params[0];
+  if (rel.includes("..") || rel.startsWith("/")) return res.status(400).send("Bad path");
+  const type = rel.endsWith(".json") ? "application/json"
+    : rel.endsWith(".html") ? "text/html" : "application/octet-stream";
+
+  if (githubConfig().enabled) {
+    try {
+      const live = await fetchRepoFile("reports/" + rel);
+      if (live != null) {
+        res.set("Cache-Control", "no-store");
+        res.type(type);
+        return res.send(live);
+      }
+    } catch (e) {
+      console.error("live report fetch failed, falling back to local:", e.message);
+    }
+  }
+  const localPath = path.join(REPORTS_DIR, rel);
+  if (fs.existsSync(localPath)) { res.set("Cache-Control", "no-store"); return res.sendFile(localPath); }
+  return res.status(404).send("Not found");
+});
 
 app.listen(PORT, () => console.log(`Weekly Support AI Insights running on port ${PORT}`));
